@@ -1,0 +1,530 @@
+<title>Random Picker Tool</title>
+<style>
+  body { 
+    background-color: #36b8c5;
+    margin: 0;
+    color: #424242;
+  }
+  button {
+    cursor: pointer;
+    background: #36b8c5;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  button:hover {
+    background: #3a96a0;
+    color: white;
+  }
+  input[type=number], textarea {
+    margin-top: 5px;
+    width: 100%;
+  }
+  .centered {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #init {
+    flex-direction: column;
+  }
+  #header {
+    width: 980px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  #title {
+    font-size: 30px;
+    font-weight: bold;
+  }
+  #setting {
+    width: 1000px;
+    background: #eaeaea;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  #info {
+    width: 980px;
+    padding: 0 10px;
+  }
+  #setting .col {
+    padding: 10px;
+  }
+  #setting .col-1 {
+    width: 280px;
+  }
+  #setting .col-2 {
+    width: 330px;
+  }
+  #list {
+    height: 300px;
+    resize: none;
+  }
+  .advanced {
+    display: none;
+  }
+  #setting.toggled .simple {
+    display: none;
+  }
+  #setting.toggled .advanced {
+    display: block;
+  }
+  #selectable {
+    height: 400px;
+    background: white;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: scroll;
+  }
+  input[name=game] {
+    display: none;
+  }
+  .options {
+    padding: 10px;
+    cursor: pointer;
+    display: block;
+    user-select: none;
+  }
+  .options:hover, input[name=game]:checked + .options {
+    background: #3a96a0;
+    color: white;
+  }
+  #btnProceed {
+    width: 100%;
+    padding: 10px 0;
+  }
+  #preview {
+    width: 100%;
+    height: 100%;
+    margin-top: 5px;
+    color: white;
+    background-color: #00776c;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  #previewImg {
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  #main {
+    display: none;
+  }
+  #back {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 18px;
+    color: white;
+    cursor: pointer;
+  }
+  .arrow {
+    float: left;
+    margin-right: 10px;
+    border: solid transparent;
+    border-width: 10px 20px 10px 0px;
+    border-right-color: white;
+  }
+
+  /* WHEELS OF (UN)FORTUNE */
+
+  #arrowContainer {
+    position: absolute;
+    top: 325px;
+    width: 100%;
+    z-index: 1;
+    left: 0;
+  }
+  #arrowContainer div {
+    margin: 0 auto;
+    border-right: 50px solid yellow;
+    border-top: 25px solid transparent;
+    border-bottom: 25px solid transparent;
+    width: 600px;
+    filter: drop-shadow(-5px 5px 5px black);
+  }
+  #wheelContainer {
+    width: 600px;
+    height: 600px;
+    display: block;
+    margin: 50px auto 0;
+    border-radius: 300px;
+    box-shadow: 0 10px 10px #004a43;
+    overflow: hidden;
+  }
+  svg {
+    width: 600px;
+    height: 600px;
+    transition: 10s;
+  }
+  path {
+    fill: #4ed4c6;
+    stroke: #202020;
+  }
+  .alternate {
+    fill: #baf4ee;
+  }
+  .alternate2 {
+    fill: #7eded4;
+  }
+  .selected {
+    fill: #006064;
+  }
+  .selected.highlight {
+    fill: white;
+  }
+  .selected.highlight + text {
+    fill: #006064;
+  }
+  .textPath {
+    fill: none;
+    stroke: none;
+  }
+  textPath {
+    fill: black;
+    font-weight: bold;
+    font-size: 40px;
+  }
+  circle {
+    fill: #008276;
+    stroke: #202020;
+  }
+
+  /* UNBOXING */
+  #boxContainer {
+    height: auto;
+    width: 600px;
+    margin: 30px auto;
+    flex-wrap: wrap;
+  }
+  .itemContainer {
+    width: 100px;
+    height: 140px;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    margin: 10px;
+    font-size: 20px;
+  }
+  .itemContainer > div {
+    position: absolute;
+    transition: 1s;
+    backface-visibility: hidden;
+    box-shadow: 0 5px 10px #004a43;
+  }
+  .itemFront {
+    background: #00776c;
+    color: white;
+  }
+  .itemBack {
+    transform: rotateY(180deg);
+    background: white;
+  }
+  .uncover .itemFront {
+    transform: rotateY(180deg);
+  }
+  .uncover .itemBack {
+    transform: rotateY(0deg);
+  }
+</style>
+<script type="text/javascript">
+</script>
+<div id="init" class="centered">
+  <div id="header">
+    <div id="title">Random Picker Tool</div>
+  </div>
+  <div id="setting">
+    <div class="col col-1">
+      <div class="simple" style="margin-bottom: 10px">
+        <label for="count">Number of options:</label><br><input type="number" id="count" name="count">
+      </div>
+      <div class="advanced" style="margin-bottom: 10px">
+        <label for="list">Custom options list (line separated):</label><br><textarea type="text" id="list" name="list"></textarea>
+      </div>
+      <div style="margin-bottom: 10px">
+        <input type="checkbox" id="remove" name="remove"><label for="remove">Remove Selected</label>
+      </div>
+      <button class="simple" onclick="clickEvent('advanced')" style="width: 100%">Advanced Settings</button>
+      <button class="advanced" onclick="clickEvent('advanced')" style="width: 100%">Simple Settings</button>
+    </div>
+    <div class="col col-2">
+      <div style="margin-bottom: 10px">Select game:</div>
+      <div id="selectable" data-selected="wheel">
+      </div>
+      <button onclick="clickEvent('proceed')" id="btnProceed">Proceed</button>
+    </div>
+    <div class="col col-2" style="display: flex; flex-direction: column;">
+      Preview:
+      <div id="preview"><img id="previewImg"><div id="previewContent"></div></div>
+    </div>
+  </div>
+  <div id="info">
+    <p>Any questions, game suggestions, bug reports, or any kind of ideas regarding this tool or other classroom related tools, please send it to <a href="mailto:aister.pendragon@gmail.com">aister.pendragon@gmail.com</a></p>
+  </div>
+</div>
+<div id="main">
+  <div id="back" onclick="clickEvent('back')"><div class="arrow"></div>Back</div>
+  <div id="gameContainer"></div>
+</div>
+<script>
+  const selectable = document.getElementById("selectable");
+  const previewImg = document.getElementById("previewImg");
+  const previewContent = document.getElementById("previewContent");
+  const setting = document.getElementById('setting');
+  const main = document.getElementById('main');
+  const init = document.getElementById('init');
+  const gameContainer = document.getElementById('gameContainer');
+  
+  //game list
+  games = {
+    wheel: {
+      name: "Wheels of (Un)Fortune",
+      info: "Spin the wheel, the (un)fortunate number will be where the wheel stops",
+      generate: function(options, spinOnLoad) {
+
+        //init
+        gameContainer.innerHTML = "";
+        main.classList.add("wheel");
+        init.style.display = "none";
+        main.style.display = "block";
+
+        wheelContainer = document.createElement('div');
+        wheelContainer.id = "wheelContainer";
+
+        //starting point
+        let x = 600;
+        let y = 300;
+        let xText = 470;
+        let yText = 300;
+        
+        //define svg node
+        let svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.style.transform = `rotate(${wheelContainer.getAttribute('rotation')}deg)`;
+
+        options.forEach((i, index) => {
+
+          //we want index counting from 1, not 0
+          index++;
+
+          //get the end points of the background curve
+          let dy = Math.round(Math.sin(-Math.PI * 2 * index / options.length) * 300) + 300;
+          let dx = Math.round(Math.cos(-Math.PI * 2 * index / options.length) * 300) + 300;
+
+          //creating background path
+          let path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          path.setAttribute('d', `M 300 300 L ${x} ${y} A 300 300 0 0 0 ${dx} ${dy} Z`);
+          path.setAttribute('id', `path${index}`);
+
+          //setting color
+          if (options.length % 2) {
+            if (index % 3 == 2) path.classList.add("alternate");
+            else if (index % 3 == 0) path.classList.add("alternate2");
+            else if (index == options.length) path.classList.add("alternate");
+          } else if (index % 2 == 0) path.classList.add("alternate");
+
+          //append to svg
+          svg.appendChild(path);
+
+          //get the end points of the text curve
+          let dyText = Math.round(Math.sin(-Math.PI * 2 * index / options.length) * 170) + 300;
+          let dxText = Math.round(Math.cos(-Math.PI * 2 * index / options.length) * 170) + 300;
+
+          //creating text path
+          let pathText = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          pathText.setAttribute('d', `M ${dxText} ${dyText} A 170 170 0 0 1 ${xText} ${yText}`);
+          pathText.classList.add('textPath');
+          pathText.setAttribute('id', `textpath${index}`);
+
+          //appending text path
+          svg.appendChild(pathText);
+
+          //creating and appending text
+          let text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+          text.innerHTML = `<textpath startOffset="50%" href="#textpath${index}">${i}</textpath>`;
+          text.setAttribute('text-anchor', 'middle');
+          svg.appendChild(text);
+
+          //setting the starting points for the next option
+          x = dx; xText = dxText;
+          y = dy; yText = dyText;
+        });
+
+        //init for small dot
+        let circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', "300px");
+        circle.setAttribute('cy', "300px");
+        circle.setAttribute('r', "10px");
+        svg.appendChild(circle);
+
+        let arrow = document.createElement('div');
+        arrow.id = "arrowContainer";
+        arrow.innerHTML = "<div></div>";
+
+        wheelContainer.appendChild(arrow);
+        wheelContainer.appendChild(svg);
+
+        gameContainer.appendChild(wheelContainer);
+
+        spin = function() {
+          //init
+          const maxSpin = 10;
+          const minSpin = 5;
+
+          //get end spin degree and the selected options
+          let spin = Math.floor((Math.random() * maxSpin * 360) + minSpin * 360);
+          let selected = Math.floor((spin % 360) / (360 / options.length)) + 1;
+          let selectedPath = document.getElementById(`path${selected}`);
+
+          //remove selected options if checked
+          if (document.getElementById('remove').checked && options.length > 2) options.splice(selected - 1, 1);
+          
+          svg.style.transform = `rotate(${spin}deg)`;
+          wheelContainer.setAttribute('rotation', spin % 360);
+          svg.classList.add('spinning');
+          setTimeout(function() {
+            selectedPath.classList.add('selected');
+            svg.classList.remove('spinning');
+            svg.classList.add('spinDone');
+
+            setInterval(function() {
+              selectedPath.classList.toggle('highlight');
+            }, 500);
+          }, 10000);
+        }
+        if (spinOnLoad) setTimeout(function() { spin(); }, 100);
+        main.onclick = function () {
+
+          if (svg.classList.contains("spinDone")) {
+            //if it is done spinning, generate again
+            svg.classList.remove("spinDone");
+            games.wheel.generate(options, true);
+          } else if (!svg.classList.contains("spinning")) {
+            //if it is waiting to spin, spin it
+            spin();
+          }
+        }
+      }
+    },
+    card: {
+      name: "Pick a card",
+      info: "Cards are randomly arranged and hidden, and will be revealed when you click on it",
+      generate: function(options) {
+
+        //init
+        gameContainer.innerHTML = "";
+        main.classList.add("box");
+        init.style.display = "none";
+        main.style.display = "block";
+
+        let boxContainer = document.createElement('div');
+        boxContainer.id = "boxContainer";
+        boxContainer.className = "centered";
+
+        //randomize the options
+        let currentIndex = options.length;
+        let randomIndex;
+
+        while (currentIndex != 0) {
+          randomIndex = Math.floor(Math.random() * currentIndex);
+          currentIndex--;
+
+          [options[currentIndex], options[randomIndex]] = [options[randomIndex], options[currentIndex]];
+        }
+
+        options.forEach((i, index) => {
+
+          //we need index from 1, not from 0
+          index++;
+          let itemContainer = document.createElement('div');
+          itemContainer.className = "itemContainer";
+          itemContainer.onclick = function() {
+            itemContainer.classList.add('uncover');
+          }
+          itemContainer.innerHTML = `<div class="itemFront centered">${index}</div><div class="itemBack centered">${i}</div>`;
+          boxContainer.appendChild(itemContainer);
+        })
+
+        gameContainer.appendChild(boxContainer);
+      }
+    }
+  }
+
+  //onclick functions
+  function clickEvent(data) {
+    if (data == "advanced") {
+      //toggling advanced / simple setting
+      setting.classList.toggle("toggled");
+     
+    } else if (data == "back") {
+      //back to main menu
+      if (confirm("This will reset the whole game, do you want to continue?")) {
+        main.style.display = "none";
+        main.className = "";
+        gameContainer.innerHTML = "";
+        init.style.display = "flex";
+        init.classList.remove('about');
+      }
+
+    } else if (data == "proceed") {
+      //proceed to games
+      init.classList.remove('about');
+
+      //get game
+      let game = selectable.getAttribute('data-selected');
+
+      //get options
+      let options = [];
+      if (setting.classList.contains('toggled')) { 
+        //setting mode is advanced
+        //proceed to get value from textarea and split it into options
+        options = document.getElementById('list').value.split('\n').filter(i => { return i });
+      } else {
+        //setting mode is simple
+        //proceed to get value from input and fill array
+        let count = parseInt(document.getElementById('count').value);
+        if(isNaN(count)) count = 2;
+        options = [...new Array(count)].map((i, index) => { return index + 1 })
+      }
+
+      //if number of options is less than 2, fill the rest with number
+      if (options.length == 1) options = [...options, 2];
+      else if (options.length == 0) options = [1, 2];
+
+      games[game].generate(options, false);
+    
+    } else if (data == "about") {
+      //go to about page
+      init.classList.add('about');
+    } else if (data == "setting") {
+      //go to back to setting
+      init.classList.remove('about');
+    }
+    
+  }
+
+  //looping game options
+  let gameIndex = 0;
+  for (let game in games) {
+    let html = `<input type="radio" name="game" id="radio_${game}"`;
+    if (gameIndex == 0) {
+      html += ` checked="checked"`;
+      previewImg.src = `img/preview/${game}.png`;
+      previewContent.innerHTML = games[game].info;
+    }
+    html += `><div class="options" onclick="radio('${game}')">${games[game].name}</div>`;
+    selectable.innerHTML += html;
+    gameIndex++;
+  }
+
+  //option onclick function
+  function radio(game) {
+    selectable.setAttribute('data-selected', game);
+    previewImg.src = `img/preview/${game}.png`;
+    document.getElementById("radio_" + game).checked = true;
+    previewContent.innerHTML = games[game].info;
+  }
+</script>
