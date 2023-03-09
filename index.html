@@ -452,6 +452,11 @@
       }
     }
   }
+  
+  if (window.location.search) {
+    let s = window.location.search.slice(1).split('&');
+    games[s[0].slice(2)].generate(s[1].slice(2).split(','), false);
+  }
 
   //onclick functions
   function clickEvent(data) {
@@ -494,7 +499,7 @@
       if (options.length == 1) options = [...options, 2];
       else if (options.length == 0) options = [1, 2];
 
-      games[game].generate(options, false);
+      window.location.href = `?g=${game}&o=${options}`;
     
     } else if (data == "about") {
       //go to about page
