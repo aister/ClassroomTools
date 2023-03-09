@@ -496,7 +496,7 @@
       if (options.length == 1) options = [...options, 2];
       else if (options.length == 0) options = [1, 2];
 
-      window.location.href = `?g=${game}&r=${document.getElementById('remove').checked}o=${options}`;
+      window.location.href = `?g=${game}&r=${document.getElementById('remove').checked}&o=${options}`;
     
     } else if (data == "about") {
       //go to about page
