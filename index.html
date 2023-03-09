@@ -455,7 +455,8 @@
   
   if (window.location.search) {
     let s = window.location.search.slice(1).split('&');
-    games[s[0].slice(2)].generate(s[1].slice(2).split(','), false);
+    if (s[1].slice(2) == "true") document.getElementById('remove').checked = true;
+    games[s[0].slice(2)].generate(s[2].slice(2).split(','), false);
   }
 
   //onclick functions
@@ -467,11 +468,7 @@
     } else if (data == "back") {
       //back to main menu
       if (confirm("This will reset the whole game, do you want to continue?")) {
-        main.style.display = "none";
-        main.className = "";
-        gameContainer.innerHTML = "";
-        init.style.display = "flex";
-        init.classList.remove('about');
+        window.location.href = "."
       }
 
     } else if (data == "proceed") {
@@ -499,7 +496,7 @@
       if (options.length == 1) options = [...options, 2];
       else if (options.length == 0) options = [1, 2];
 
-      window.location.href = `?g=${game}&o=${options}`;
+      window.location.href = `?g=${game}&r=${document.getElementById('remove').checked}o=${options}`;
     
     } else if (data == "about") {
       //go to about page
