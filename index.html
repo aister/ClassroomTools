@@ -454,7 +454,7 @@
   }
   
   if (window.location.search) {
-    let s = window.location.search.slice(1).split('&');
+    let s = decodeURI(window.location.search).slice(1).split('&');
     if (s[1].slice(2) == "true") document.getElementById('remove').checked = true;
     games[s[0].slice(2)].generate(s[2].slice(2).split(','), false);
   }
